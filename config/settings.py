@@ -9,7 +9,6 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-import os
 from pathlib import Path
 import dj_database_url
 
@@ -26,8 +25,11 @@ SECRET_KEY = 'django-insecure-+y1juq+fen-jdqjt=t95i)%t_xj)g7@p1kwu1ras91@m$7y3bf
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "sports-volunteer-app.onrender.com",
+]
 
 # Application definition
 
