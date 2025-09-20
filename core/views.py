@@ -47,7 +47,14 @@ def match_list(request):
     profile, _ = Profile.objects.get_or_create(user=request.user)
     user_team = profile.home_team
 
+    # --- filtering logic ---
+    selected_team = request.GET.get("team")
     matches = Match.objects.all().prefetch_related("slots", "home_team")
+    if selected_team:
+        matches = matches.filter(home_team__name=selected_team)  # adjust if home_team is CharField
+
+    # collect all home teams for dropdown
+    teams = Match.objects.values_list("home_team__name", flat=True).distinct()
 
     match_data = []
     for match in matches:
@@ -65,7 +72,15 @@ def match_list(request):
             "open_slot": open_slot,
         })
 
-    return render(request, "core/match_list.html", {"match_data": match_data})
+    return render(
+        request,
+        "core/match_list.html",
+        {
+            "match_data": match_data,
+            "teams": teams,
+            "selected_team": selected_team,
+        },
+    )
 
 @login_required
 def signup_slot(request, match_id, slot_id):

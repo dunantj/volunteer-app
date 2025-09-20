@@ -60,6 +60,16 @@ class VolunteerSlot(models.Model):
             return f"{self.match} – {self.volunteer.username}"
         return f"{self.match} – (open slot)"
 
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        from .models import Profile  # avoid circular import
+        Profile.objects.create(user=instance)
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    instance.profile.save()
+
 # Signal to create 3 empty slots whenever a match is created
 @receiver(post_save, sender=Match)
 def create_slots_for_match(sender, instance, created, **kwargs):
