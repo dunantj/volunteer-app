@@ -1,1 +1,1 @@
-web: gunicorn volunteer-app.wsgi
+web: gunicorn config.wsgi
