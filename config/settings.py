@@ -157,4 +157,4 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")  # Verified Brevo email
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")  # SMTP key
-DEFAULT_FROM_EMAIL = "Volunteer App <{}>".format(os.environ.get("EMAIL_HOST_USER"))
+DEFAULT_FROM_EMAIL = "SMZ Admin <joel.dunant@example.com>"
