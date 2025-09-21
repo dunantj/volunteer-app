@@ -61,6 +61,29 @@
             display: block;
             margin-bottom: 5px;
         }
+        .btn {
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            display: inline-block;
+            transition: background 0.2s;
+            margin: 8px 0;
+        }
+        .btn-green {
+            background: #27ae60;
+            color: #fff;
+        }
+        .btn-blue {
+            background: #2980b9;
+            color: #fff;
+        }
+        .btn-dark {
+            background: #2c3e50;
+            color: #fff;
+        }
     </style>
 </head>
 <body>
@@ -70,6 +93,7 @@
             {% if user.is_authenticated %}
                 <span>Hi, {{ user.username }}!</span>
                 <a href="{% url 'match_list' %}">Matches</a>
+                <a href="{% url 'offer_list' %}">Trades & Offers</a>
                 <a href="{% url 'profile' %}">Profile</a>
                 <form method="post" action="{% url 'logout' %}" style="display:inline;">
                     {% csrf_token %}

@@ -66,6 +66,23 @@ A Django application to coordinate volunteering for sports club matches. Members
 
 ---
 
+## Running Tests
+
+To run the automated tests for the app, use:
+
+```bash
+python manage.py test
+```
+
+This will discover and run all tests in the project.  
+You can also run tests for a specific app (e.g., `core`) with:
+
+```bash
+python manage.py test core
+```
+
+Test output will show which tests passed or failed.
+
 ## Notes
 
 - Volunteer slots: Each match automatically creates 3 slots for volunteers.
@@ -78,5 +95,6 @@ A Django application to coordinate volunteering for sports club matches. Members
 ## Future Improvements
 
 - Add notifications for upcoming matches
-- Add filtering/search for matches by date or location
+- Add mandatory confirmation 10 days before match
+- Add filtering/search for matches by date
 - Add an exchange page, for players to trade slots

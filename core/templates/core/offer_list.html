@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Trades & Offers</h2>
+<form method="get" style="display:flex; gap:20px; align-items:center; margin-bottom:20px;">
+    <div>
+        <label for="status">Status:</label>
+        <select name="status" id="status" onchange="this.form.submit()" class="btn btn-dark" style="margin-left:5px;">
+            <option value="open" {% if selected_status == "open" %}selected{% endif %}>Open</option>
+            <option value="closed" {% if selected_status == "closed" %}selected{% endif %}>Closed</option>
+            <option value="all" {% if selected_status == "all" %}selected{% endif %}>All</option>
+        </select>
+    </div>
+    <div>
+        <label for="my_offers">
+            <input type="checkbox" name="my_offers" id="my_offers" {% if my_offers %}checked{% endif %} onchange="this.form.submit()" />
+            Only my offers
+        </label>
+    </div>
+</form>
+<a class="btn btn-blue" href="{% url 'offer_create' %}">Create New Offer</a>
+<div>
+  {% for offer in offers %}
+    <div class="match-card" style="padding:15px; border:1px solid #ccc; border-radius:8px; margin-bottom:15px; background:#fafafa;">
+      <strong>{{ offer.get_type_display }}</strong> by {{ offer.user }} for slot {{ offer.slot }}<br>
+      <span style="color:#555;">{{ offer.details|linebreaks }}</span>
+      <div style="margin-top:8px;">
+        <small>{{ offer.created_at }}</small>
+        {% if offer.status == "open" and user != offer.user %}
+          <form method="post" action="{% url 'accept_offer' offer.id %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-blue">Accept offer</button>
+          </form>
+        {% elif offer.status == "closed" %}
+          <span style="color:#888; margin-left:10px;">Offer closed</span>
+        {% endif %}
+      </div>
+    </div>
+  {% empty %}
+    <div class="match-card" style="padding:15px; border:1px solid #ccc; border-radius:8px; background:#fafafa;">
+      No offers yet.
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

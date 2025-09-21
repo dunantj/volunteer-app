@@ -1,8 +1,8 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
-from .models import Match, VolunteerSlot, Profile, HomeTeam
+from .models import Match, VolunteerSlot, HomeTeam, Offer
 from django.urls import reverse
-from datetime import datetime, date, time
+from datetime import date, time
 
 class VolunteerAppTests(TestCase):
 
@@ -13,8 +13,9 @@ class VolunteerAppTests(TestCase):
         self.team_c = HomeTeam.objects.create(name="Team C")
         self.team_d = HomeTeam.objects.create(name="Team D")
 
-        # Create a user
-        self.user = User.objects.create_user(username="testuser", password="testpass")
+        # Create users
+        self.user1 = User.objects.create_user(username="user1", password="pass")
+        self.user2 = User.objects.create_user(username="user2", password="pass")
 
         # Create a match
         self.match = Match.objects.create(
@@ -31,7 +32,7 @@ class VolunteerAppTests(TestCase):
 
     def test_signup_and_volunteer(self):
         # Login the user
-        login = self.client.login(username="testuser", password="testpass")
+        login = self.client.login(username="user1", password="pass")
         self.assertTrue(login)
 
         # Check match list view
@@ -45,7 +46,7 @@ class VolunteerAppTests(TestCase):
 
         # Refresh from DB
         self.slot1.refresh_from_db()
-        self.assertEqual(self.slot1.volunteer, self.user)
+        self.assertEqual(self.slot1.volunteer, self.user1)
 
     def test_home_team_filter(self):
         # Create a second match with a different home team
@@ -62,7 +63,7 @@ class VolunteerAppTests(TestCase):
         VolunteerSlot.objects.create(match=match2)
 
         # Login
-        self.client.login(username="testuser", password="testpass")
+        self.client.login(username="user1", password="pass")
 
         # 1️⃣ Request match list without filter - should contain both matches
         response = self.client.get(reverse("match_list"))
@@ -79,10 +80,27 @@ class VolunteerAppTests(TestCase):
         self.assertNotContains(response, f"{self.team_b} vs {self.team_c}")
         self.assertContains(response, f"{self.team_a} vs {self.team_d}")
 
+    # Test offer creation and acceptance
+    def test_create_trade_offer(self):
+        offer = Offer.objects.create(user=self.user1, slot=self.slot1, type="trade", details="Want to swap?")
+        self.assertEqual(offer.status, "open")
+        self.assertEqual(offer.type, "trade")
+        self.assertEqual(offer.user, self.user1)
+
+    def test_accept_trade_offer(self):
+        offer = Offer.objects.create(user=self.user1, slot=self.slot1, type="trade", details="Want to swap?")
+        self.client.login(username="user2", password="pass")
+        response = self.client.post(reverse('accept_offer', args=[offer.id]))
+        offer.refresh_from_db()
+        self.slot1.refresh_from_db()
+        self.assertEqual(offer.status, "closed")
+        self.assertEqual(self.slot1.volunteer, self.user2)
+        self.assertRedirects(response, reverse('offer_list'))
+
     def test_delete_user_and_match(self):
         # Delete user
-        self.user.delete()
-        self.assertFalse(User.objects.filter(username="testuser").exists())
+        self.user1.delete()
+        self.assertFalse(User.objects.filter(username="user1").exists())
         
         # The slot should no longer have a volunteer
         self.slot1.refresh_from_db()

@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.conf import settings
+
 
 class HomeTeam(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -43,8 +45,6 @@ class Match(models.Model):
         for _ in range(num - self.slots.count()):
             VolunteerSlot.objects.create(match=self)
 
-
-
 class VolunteerSlot(models.Model):
     match = models.ForeignKey(Match, on_delete=models.CASCADE, related_name="slots")
     volunteer = models.ForeignKey(
@@ -59,6 +59,27 @@ class VolunteerSlot(models.Model):
         if self.volunteer:
             return f"{self.match} – {self.volunteer.username}"
         return f"{self.match} – (open slot)"
+
+class Offer(models.Model):
+    OFFER_TYPE_CHOICES = [
+        ("time", "I'm available!"),
+        ("trade", "I'm looking to trade!"),
+    ]
+    STATUS_CHOICES = [
+        ("open", "Open"),
+        ("accepted", "Accepted"),
+        ("completed", "Completed"),
+        ("cancelled", "Cancelled"),
+    ]
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    slot = models.ForeignKey("VolunteerSlot", on_delete=models.CASCADE)
+    type = models.CharField(max_length=10, choices=OFFER_TYPE_CHOICES)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="open")
+    details = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user} - {self.get_type_display()} ({self.slot})"
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
@@ -76,3 +97,4 @@ def create_slots_for_match(sender, instance, created, **kwargs):
     if created:
         for _ in range(3):
             VolunteerSlot.objects.create(match=instance)
+
