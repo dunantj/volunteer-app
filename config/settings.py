@@ -30,6 +30,7 @@ ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
     "sports-volunteer-app.onrender.com",
+    "volunteer-app-dusky.vercel.app",
 ]
 
 # Application definition
