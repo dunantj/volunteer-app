@@ -5,6 +5,9 @@ from .models import HomeTeam, Profile, Offer, VolunteerSlot
 
 class CustomSignupForm(UserCreationForm):
     email = forms.EmailField(required=True)
+    first_name = forms.CharField(max_length=30, required=True)
+    last_name = forms.CharField(max_length=30, required=True)
+    phone_number = forms.CharField(max_length=20, required=False)
     home_team = forms.ModelChoiceField(
         queryset=HomeTeam.objects.all(),
         required=False,
@@ -13,38 +16,31 @@ class CustomSignupForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ("username", "email", "password1", "password2", "home_team")
+        fields = (
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "phone_number",
+            "password1",
+            "password2",
+            "home_team",
+        )
 
     def save(self, commit=True):
         user = super().save(commit=False)
         user.email = self.cleaned_data["email"]
-        if commit:
-            user.save()
-            # Save home_team into profile
-            home_team = self.cleaned_data.get("home_team")
-            if home_team:
-                user.profile.home_team = home_team
-                user.profile.save()
-        return user
-
-class SignUpForm(UserCreationForm):
-    first_name = forms.CharField(max_length=30, required=True)
-    last_name = forms.CharField(max_length=30, required=True)
-    phone_number = forms.CharField(max_length=20, required=False)
-
-    class Meta:
-        model = User
-        fields = ("username", "first_name", "last_name", "phone_number", "password1", "password2")
-
-    def save(self, commit=True):
-        user = super().save(commit=False)
         user.first_name = self.cleaned_data["first_name"]
         user.last_name = self.cleaned_data["last_name"]
         if commit:
             user.save()
-            # Save phone number to profile
-            user.profile.phone_number = self.cleaned_data["phone_number"]
-            user.profile.save()
+            # Save phone number and home_team to profile
+            profile = user.profile
+            profile.phone_number = self.cleaned_data.get("phone_number", "")
+            home_team = self.cleaned_data.get("home_team")
+            if home_team:
+                profile.home_team = home_team
+            profile.save()
         return user
 
 class ProfileForm(forms.ModelForm):
