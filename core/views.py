@@ -52,7 +52,11 @@ def match_list(request):
     # --- filtering logic ---
     selected_team = request.GET.get("team")
     only_my_matches = request.GET.get("my_matches") == "on"
-    matches = Match.objects.all().prefetch_related("slots", "home_team")
+    matches = (
+        Match.objects.all()
+        .prefetch_related("slots", "home_team")
+        .order_by("date")  # upcoming matches first
+    )
     if selected_team:
         matches = matches.filter(home_team__name=selected_team)
     if only_my_matches:
@@ -63,10 +67,7 @@ def match_list(request):
 
     match_data = []
     for match in matches:
-        can_volunteer = True
-        if user_team and match.home_team == user_team:
-            can_volunteer = False
-
+        can_volunteer = not (user_team and match.home_team == user_team)
         user_signed_up = match.slots.filter(volunteer=request.user).exists()
         open_slot = match.slots.filter(volunteer__isnull=True).first()
 
