@@ -4,8 +4,14 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.generic import ListView, CreateView
 from django.urls import reverse_lazy
+from django.core.mail import EmailMessage
+from django.template.loader import render_to_string
+from django.conf import settings
+from django.utils import timezone
+from .utils import create_ics_for_slot
 from .forms import CustomSignupForm, ProfileForm, UserForm, OfferForm
 from .models import Match, VolunteerSlot, Profile, Offer
+from datetime import datetime, timedelta
 
 def signup(request):
     if request.method == "POST":
@@ -100,9 +106,36 @@ def signup_slot(request, match_id, slot_id):
     elif slot.match.slots.filter(volunteer=request.user).exists():
         messages.error(request, "You are already volunteering for this match.")
     else:
+        # --- assign the volunteer ---
         slot.volunteer = request.user
         slot.save()
-        messages.success(request, "You successfully signed up, thanks a lot!")
+
+        # --- send confirmation email ---
+        start_dt = datetime.combine(slot.match.date, slot.match.start_time)
+        start_dt = timezone.make_aware(start_dt, timezone.get_current_timezone())
+
+        subject = f"✅ Confirmation: Volunteering for {slot.match}"
+        message = render_to_string('volunteers/email_confirmation.txt',
+            {
+                'user': request.user,
+                'slot': slot,
+                "arrival_time": start_dt - timedelta(minutes=90),
+            }
+        )
+
+        email = EmailMessage(
+            subject,
+            message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[request.user.email],
+            cc=[settings.VOLUNTEERING_ADMIN_EMAIL],
+        )
+
+        ics_content = create_ics_for_slot(slot)
+        email.attach(f"volunteering-{slot.id}.ics", ics_content, 'text/calendar')
+        email.send(fail_silently=False)
+
+        messages.success(request, "You successfully signed up, thanks a lot! A confirmation email has been sent.")
 
     return redirect("match_list")
 

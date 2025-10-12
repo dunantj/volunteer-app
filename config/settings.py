@@ -147,15 +147,15 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Temporary local email backend
-"""
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-DEFAULT_FROM_EMAIL = 'Volunteer App <noreply@example.com>'
-"""
-# Production email backend (Brevo / formerly Sendinblue)
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp-relay.brevo.com"
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
+if DEBUG: 
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+else:
+    # Production email backend (Brevo / formerly Sendinblue)
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_HOST = "smtp-relay.brevo.com"
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")  # Verified Brevo email
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")  # SMTP key
-DEFAULT_FROM_EMAIL = "SMZ Admin <joel.dunant@gmail.com>"
+DEFAULT_FROM_EMAIL = "No reply SMZ <joel.dunant@gmail.com>"
+VOLUNTEERING_ADMIN_EMAIL = "SMZ Admin <joel.dunant@gmail.com>"

@@ -1,0 +1,12 @@
+Hi {{ user.first_name|default:user.username }},
+
+Thanks for signing up to volunteer for {{ slot.match }}!
+
+🕒 Date & time: {{ arrival_time|date:"l, j F Y, H:i" }}
+📍 Location: {{ slot.match.location }}
+🎯 Role: "Kampfrichter Tisch"
+
+An .ics file is attached so you can add this to your calendar.
+
+See you soon!
+— The SMZ volunteer Team
