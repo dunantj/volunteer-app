@@ -25,7 +25,7 @@
 <!-- Match list -->
 {% for item in match_data %}
 <div class="match-card" style="padding:15px; border:1px solid #ccc; border-radius:8px; margin-bottom:15px; background:#fafafa;">
-    <strong>{{ item.match.date }} {{ item.match.start_time }}:</strong>
+    <strong>{{ item.match.date }} - Match start at {{ item.match.start_time }} (meeting time 90 minutes before):</strong>
     {{ item.match.home_team }} vs {{ item.match.guest_team }} ({{ item.match.location }})
     <br>
     <strong>Volunteers ({{ item.match.volunteer_count }}/3):</strong>
